@@ -1,2 +1,12 @@
 ###
 GET http://localhost:8080/health
+
+### Create User
+POST http://localhost:8080/user/register
+Content-Type: application/json
+
+{
+    "username": "test",
+    "email": "test@test.com",
+    "password": "test"
+}

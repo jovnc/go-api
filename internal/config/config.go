@@ -1,4 +1,4 @@
-package configs
+package config
 
 import (
 	"fmt"
@@ -19,9 +19,14 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("error loading file: %v", err)
 	}
 
+	databaseURL := getEnv("DATABASE_URL", "")
+	if databaseURL == "" {
+		return nil, fmt.Errorf("DATABASE_URL is required")
+	}
+
 	return &Config{
 		ServerPort:  getEnv("SERVER_PORT", "8080"),
-		DatabaseURL: getEnv("DATABASE_URL", "postgres"),
+		DatabaseURL: databaseURL,
 		Environment: getEnv("ENVIRONMENT", "development"),
 		LogLevel:    getEnv("LOG_LEVEL", "info"),
 	}, nil

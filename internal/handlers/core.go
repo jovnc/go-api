@@ -1,10 +1,13 @@
 package handlers
 
+import "gorm.io/gorm"
+
 type Handler struct {
-	// DB instance
-	// Query stores
+	DB *gorm.DB
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(db *gorm.DB) *Handler {
+	return &Handler{
+		DB: db,
+	}
 }
