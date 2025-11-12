@@ -8,11 +8,14 @@ import (
 )
 
 type Config struct {
-	ServerPort  string
-	DatabaseURL string
-	Environment string
-	LogLevel    string
+	ServerPort   string
+	DatabaseURL  string
+	Environment  string
+	LogLevel     string
+	JWTSecretKey string
 }
+
+var GlobalConfig *Config
 
 func LoadConfig() (*Config, error) {
 	if err := godotenv.Load(); err != nil {
@@ -24,12 +27,20 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("DATABASE_URL is required")
 	}
 
-	return &Config{
-		ServerPort:  getEnv("SERVER_PORT", "8080"),
-		DatabaseURL: databaseURL,
-		Environment: getEnv("ENVIRONMENT", "development"),
-		LogLevel:    getEnv("LOG_LEVEL", "info"),
-	}, nil
+	jwtSecretKey := getEnv("JWT_SECRET_KEY", "")
+	if jwtSecretKey == "" {
+		return nil, fmt.Errorf("JWT_SECRET_KEY is required")
+	}
+
+	GlobalConfig = &Config{
+		ServerPort:   getEnv("SERVER_PORT", "8080"),
+		DatabaseURL:  databaseURL,
+		Environment:  getEnv("ENVIRONMENT", "development"),
+		LogLevel:     getEnv("LOG_LEVEL", "info"),
+		JWTSecretKey: jwtSecretKey,
+	}
+
+	return GlobalConfig, nil
 }
 
 func getEnv(key, defaultValue string) string {

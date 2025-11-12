@@ -15,15 +15,15 @@ import (
 var DB *gorm.DB
 
 // Connect makes connection to database
-func Connect(config *config.Config) error {
+func Connect() error {
 	var gormLogger logger.Interface
-	if config.Environment == "development" {
+	if config.GlobalConfig.Environment == "development" {
 		gormLogger = logger.Default.LogMode(logger.Info)
 	} else {
 		gormLogger = logger.Default.LogMode(logger.Error)
 	}
 
-	db, err := gorm.Open(postgres.Open(config.DatabaseURL), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(config.GlobalConfig.DatabaseURL), &gorm.Config{
 		Logger: gormLogger,
 	})
 	if err != nil {
