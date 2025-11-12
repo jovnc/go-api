@@ -11,7 +11,7 @@ build:
 
 dev:
 	@echo "Running $(APP_NAME) in development mode..."
-	@air
+	@go tool air
 
 start:build
 	@echo "Starting $(APP_NAME)..."
