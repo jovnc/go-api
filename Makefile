@@ -1,17 +1,21 @@
-.PHONY: run build migrate clean deps fmt stop help
+.PHONY: dev start build migrate clean deps fmt stop
 
 APP_NAME=go_api
 BINARY_NAME=gobin
 BUILD_DIR=./bin
 GO_FILES=$(shell find . -name "*.go" -not -path "./vendor/*")
 
-run:
-	@echo "Running $(APP_NAME)..."
-	@go run ./cmd/api || true
-
 build:
 	@echo "Building $(APP_NAME)..."
 	@go build -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd/api
+
+dev:
+	@echo "Running $(APP_NAME) in development mode..."
+	@air
+
+start:build
+	@echo "Starting $(APP_NAME)..."
+	@$(BUILD_DIR)/$(BINARY_NAME)
 
 migrate:
 	@echo "Migrating database..."
@@ -33,15 +37,3 @@ fmt:
 stop:
 	@echo "Stopping $(APP_NAME)..."
 	@pkill -f "go run ./cmd/api" || echo "No $(APP_NAME) process found"
-
-help:
-	@echo "Usage: make <target>"
-	@echo "Targets:"
-	@echo "  run - Run the $(APP_NAME)"
-	@echo "  build - Build the $(APP_NAME)"
-	@echo "  migrate - Run migrations for the database"
-	@echo "  clean - Clean up the build directory"
-	@echo "  deps - Download dependencies"
-	@echo "  fmt - Format the code"
-	@echo "  stop - Stop the $(APP_NAME) process"
-	@echo "  help - Show this help message"
