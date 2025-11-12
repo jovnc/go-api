@@ -1,8 +1,8 @@
 .PHONY: dev start build migrate clean deps fmt stop
 
 APP_NAME=go_api
-BINARY_NAME=gobin
-BUILD_DIR=./bin
+BINARY_NAME=go_api
+BUILD_DIR=./build
 GO_FILES=$(shell find . -name "*.go" -not -path "./vendor/*")
 
 build:

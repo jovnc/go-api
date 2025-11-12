@@ -32,11 +32,18 @@ func main() {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
 
+	// Connect to Redis
+	redisClient := database.ConnectRedis()
+	if redisClient == nil {
+		log.Fatalf("Failed to connect to Redis: %v", err)
+	}
+	defer redisClient.Close()
+
 	// Set up HTTP server
 	mux := http.NewServeMux()
 
 	// Setup handler
-	handler := handlers.NewHandler(database.GetDB())
+	handler := handlers.NewHandler(database.GetDB(), redisClient)
 
 	// Setup routes
 	routes.SetupRoutes(mux, handler)

@@ -22,4 +22,4 @@ Content-Type: application/json
 
 ### Get User Profile
 GET http://localhost:8080/users/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMwMTA4NzZ9.RhnIGs_iyzAbVTbY0Z-EthkprTWUCzM_uhYHUFmanO0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMwNTAzMzh9.gvkciYh3E3g_BrnGtqB2UdIhxGS0EpDhTFb3o8uf8jk

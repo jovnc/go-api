@@ -7,6 +7,7 @@ A simple REST API built with Go, featuring user authentication and management.
 - User registration and authentication
 - JWT-based authentication
 - PostgreSQL database integration
+- Redis integration for caching and session management
 - Health check endpoint
 - Graceful server shutdown
 - Hot reloading in development mode (using Air)
@@ -15,6 +16,7 @@ A simple REST API built with Go, featuring user authentication and management.
 
 - Go 1.25 or higher
 - PostgreSQL database
+- Redis server
 - Make (optional, for using Makefile commands)
 
 ## Installation
@@ -44,6 +46,9 @@ JWT_SECRET_KEY=your-secret-key-here
 SERVER_PORT=8080
 ENVIRONMENT=development
 LOG_LEVEL=info
+REDIS_ADDR=localhost:6379
+REDIS_PASSWORD=
+REDIS_DB=0
 ```
 
 ## Running the Application
@@ -104,7 +109,7 @@ go_api/
 ├── internal/
 │   ├── auth/                # Authentication middleware
 │   ├── config/              # Configuration management
-│   ├── database/            # Database connection and migrations
+│   ├── database/            # Database connection, migrations, and Redis
 │   ├── dto/                 # Data transfer objects
 │   ├── handlers/            # HTTP handlers
 │   ├── models/              # Database models
@@ -118,6 +123,7 @@ go_api/
 
 - [GORM](https://gorm.io/) - ORM for database operations
 - [PostgreSQL](https://www.postgresql.org/) - Database
+- [Redis](https://redis.io/) - In-memory data store for caching and session management
 - [JWT](https://github.com/golang-jwt/jwt) - JSON Web Tokens for authentication
 - [Air](https://github.com/air-verse/air) - Live reload for Go applications
 - [godotenv](https://github.com/joho/godotenv) - Environment variable management

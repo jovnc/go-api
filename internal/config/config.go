@@ -13,6 +13,9 @@ type Config struct {
 	Environment  string
 	LogLevel     string
 	JWTSecretKey string
+	RedisAddr    string
+	RedisPassword string
+	RedisDB       string
 }
 
 var GlobalConfig *Config
@@ -38,6 +41,9 @@ func LoadConfig() (*Config, error) {
 		Environment:  getEnv("ENVIRONMENT", "development"),
 		LogLevel:     getEnv("LOG_LEVEL", "info"),
 		JWTSecretKey: jwtSecretKey,
+		RedisAddr:    getEnv("REDIS_ADDR", "localhost:6379"),
+		RedisPassword: getEnv("REDIS_PASSWORD", ""),
+		RedisDB:       getEnv("REDIS_DB", "0"),
 	}
 
 	return GlobalConfig, nil

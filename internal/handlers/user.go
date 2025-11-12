@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"go_api/internal/auth"
 	"go_api/internal/config"
@@ -22,6 +24,16 @@ func (h *Handler) UserProfileHandler() http.HandlerFunc {
 			return
 		}
 
+		// Get user from Redis (if exists)
+		cacheKey := fmt.Sprintf("user:%d", claims.UserID)
+		if cached, err := h.Redis.Get(ctx, cacheKey).Result(); err == nil {
+			var user models.User
+			if err := json.Unmarshal([]byte(cached), &user); err == nil {
+				utils.ResponseWithSuccess(w, http.StatusOK, "User profile (from cache)", user)
+				return
+			}
+		}
+
 		// Get user from database
 		user := &models.User{}
 		if err := h.DB.WithContext(ctx).Where("id = ?", claims.UserID).First(user).Error; err != nil {
@@ -29,7 +41,13 @@ func (h *Handler) UserProfileHandler() http.HandlerFunc {
 			return
 		}
 
-		utils.ResponseWithSuccess(w, http.StatusOK, "User profile", user)
+		// Cache user in Redis
+		userJSON, err := json.Marshal(user)
+		if err == nil {
+			h.Redis.Set(ctx, cacheKey, userJSON, time.Minute*5)
+		}
+		
+		utils.ResponseWithSuccess(w, http.StatusOK, "User profile (from database)", user)
 	}
 }
 
