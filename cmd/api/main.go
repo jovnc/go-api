@@ -22,7 +22,7 @@ func main() {
 	}
 
 	// Connect to database
-	if err := database.Connect(config); err != nil {
+	if err := database.Connect(); err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer database.Close()

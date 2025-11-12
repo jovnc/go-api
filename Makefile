@@ -1,20 +1,47 @@
-.PHONY: run build migrate clean
+.PHONY: run build migrate clean deps fmt stop help
 
-# Default binary name
-BINARY_NAME=go_api
+APP_NAME=go_api
+BINARY_NAME=gobin
+BUILD_DIR=./bin
+GO_FILES=$(shell find . -name "*.go" -not -path "./vendor/*")
 
 run:
-	go run ./cmd/api
+	@echo "Running $(APP_NAME)..."
+	@go run ./cmd/api || true
 
 build:
-	go build -o bin/$(BINARY_NAME) ./cmd/api
+	@echo "Building $(APP_NAME)..."
+	@go build -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd/api
 
 migrate:
-	go run ./cmd/api -migrate-only || go run -tags migrate ./cmd/api
+	@echo "Migrating database..."
+	@go run ./cmd/api -migrate-only || go run -tags migrate ./cmd/api
 
 clean:
-	rm -rf bin/
+	@echo "Cleaning up..."
+	@rm -rf $(BUILD_DIR)
 
 deps:
-	go mod download
-	go mod tidy
+	@echo "Downloading dependencies..."
+	@go mod download
+	@go mod tidy
+
+fmt:
+	@echo "Formatting code..."
+	@go fmt ./...
+
+stop:
+	@echo "Stopping $(APP_NAME)..."
+	@pkill -f "go run ./cmd/api" || echo "No $(APP_NAME) process found"
+
+help:
+	@echo "Usage: make <target>"
+	@echo "Targets:"
+	@echo "  run - Run the $(APP_NAME)"
+	@echo "  build - Build the $(APP_NAME)"
+	@echo "  migrate - Run migrations for the database"
+	@echo "  clean - Clean up the build directory"
+	@echo "  deps - Download dependencies"
+	@echo "  fmt - Format the code"
+	@echo "  stop - Stop the $(APP_NAME) process"
+	@echo "  help - Show this help message"

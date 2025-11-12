@@ -2,12 +2,36 @@ package handlers
 
 import (
 	"encoding/json"
+	"net/http"
+
+	"go_api/internal/auth"
+	"go_api/internal/config"
 	"go_api/internal/dto"
 	"go_api/internal/models"
 	"go_api/internal/utils"
-	"net/http"
-	"os"
 )
+
+func (h *Handler) UserProfileHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		// Get claims from context
+		claims, ok := r.Context().Value(auth.UserClaimsKey).(*utils.Claims)
+		if !ok {
+			utils.ResponseWithError(w, http.StatusUnauthorized, "Unauthorized", "Unauthorized")
+			return
+		}
+
+		// Get user from database
+		user := &models.User{}
+		if err := h.DB.WithContext(ctx).Where("id = ?", claims.UserID).First(user).Error; err != nil {
+			utils.ResponseWithError(w, http.StatusNotFound, "User not found", err.Error())
+			return
+		}
+
+		utils.ResponseWithSuccess(w, http.StatusOK, "User profile", user)
+	}
+}
 
 func (h *Handler) CreateUserHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +66,7 @@ func (h *Handler) CreateUserHandler() http.HandlerFunc {
 			return
 		}
 
-		utils.ResponseWithSuccess(w, http.StatusCreated, "User created successfully", user)	
+		utils.ResponseWithSuccess(w, http.StatusCreated, "User created successfully", user)
 	}
 }
 
@@ -75,7 +99,7 @@ func (h *Handler) LoginUserHandler() http.HandlerFunc {
 		}
 
 		// Generate token
-		token, err := utils.GenerateToken(user.ID, user.Username, []byte(os.Getenv("JWT_SECRET")))
+		token, err := utils.GenerateToken(user.ID, user.Username, []byte(config.GlobalConfig.JWTSecretKey))
 		if err != nil {
 			utils.ResponseWithError(w, http.StatusInternalServerError, "Failed to generate token", err.Error())
 			return
