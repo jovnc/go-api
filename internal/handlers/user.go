@@ -188,6 +188,21 @@ func (h *Handler) LogoutUserHandler() http.HandlerFunc {
 	}
 }
 
+// ListAllUsersHandler lists all users (with optional pagination)
+func (h *Handler) ListAllUsersHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		users := []models.User{}
+		if err := h.DB.WithContext(ctx).Find(&users).Error; err != nil {
+			utils.ResponseWithError(w, http.StatusInternalServerError, "Failed to list users", err.Error())
+			return
+		}
+		utils.ResponseWithSuccess(w, http.StatusOK, "List of all users", users)
+	}
+}
+
+// Helper functions
+
 // cleanUserSession cleans the user session from Redis
 func (h *Handler) cleanUserSession(ctx context.Context, userIdStr string) error {
 	iter := h.Redis.Scan(ctx, 0, userIdStr+"*", 0).Iterator()

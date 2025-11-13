@@ -27,3 +27,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJ1c
 ### Logout User
 POST http://localhost:8080/users/logout
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMxMTk5NjN9.Nfq0c7D8rMJuEt8Do-Iwm27tLRl4_kXbnxuukuT5SAo
+
+### List All Users
+GET http://localhost:8080/users/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMxMjE2Njl9.oSbnmTuxy-bW4YV8dH3zIIXddP4jVBrMxE5b_4IkbSc
