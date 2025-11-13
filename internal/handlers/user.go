@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"go_api/internal/auth"
@@ -13,6 +15,7 @@ import (
 	"go_api/internal/utils"
 )
 
+// UserProfileHandler returns the user profile
 func (h *Handler) UserProfileHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -51,6 +54,7 @@ func (h *Handler) UserProfileHandler() http.HandlerFunc {
 	}
 }
 
+// CreateUserHandler creates a new user
 func (h *Handler) CreateUserHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -88,6 +92,7 @@ func (h *Handler) CreateUserHandler() http.HandlerFunc {
 	}
 }
 
+// LoginUserHandler logs in a user
 func (h *Handler) LoginUserHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -128,4 +133,81 @@ func (h *Handler) LoginUserHandler() http.HandlerFunc {
 			"token": token,
 		})
 	}
+}
+
+// LogoutUserHandler logs out a user
+func (h *Handler) LogoutUserHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		// Get claims from context
+		claims, ok := r.Context().Value(auth.UserClaimsKey).(*utils.Claims)
+		if !ok {
+			utils.ResponseWithError(w, http.StatusBadRequest, "Missing claims", "Missing claims")
+			return
+		}
+
+		// Extract token from Authorization header
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			utils.ResponseWithError(w, http.StatusUnauthorized, "Missing Authorization header", "Missing Authorization header")
+			return
+		}
+
+		token, err := extractTokenFromHeader(authHeader)
+		if err != nil {
+			utils.ResponseWithError(w, http.StatusUnauthorized, "Missing authorization token", err.Error())
+			return
+		}
+
+		// Convert expireAt to time.Time
+		expirationTime := time.Unix(claims.ExpiresAt, 0)
+		now := time.Now()
+		ttl := expirationTime.Sub(now)
+
+		// If token is expired, set TTL to 5 minutes
+		if ttl <= 0 {
+			ttl = time.Minute * 5
+		}
+
+		// Blacklist token from Redis
+		err = h.Redis.Set(ctx, token, "blacklisted", ttl).Err()
+		if err != nil {
+			utils.ResponseWithError(w, http.StatusInternalServerError, "Failed to blacklist token", err.Error())
+			return
+		}
+
+		// Clean user profile data from Redis
+		userIdStr := fmt.Sprintf("user:%d", claims.UserID)
+		if err := h.cleanUserSession(ctx, userIdStr); err != nil {
+			utils.ResponseWithError(w, http.StatusInternalServerError, "Failed to clean user session", err.Error())
+			return
+		}
+
+		utils.ResponseWithSuccess(w, http.StatusOK, "Logout successful", nil)
+	}
+}
+
+// cleanUserSession cleans the user session from Redis
+func (h *Handler) cleanUserSession(ctx context.Context, userIdStr string) error {
+	iter := h.Redis.Scan(ctx, 0, userIdStr+"*", 0).Iterator()
+	for iter.Next(ctx) {
+		key := iter.Val()
+		if err := h.Redis.Del(ctx, key).Err(); err != nil {
+			return fmt.Errorf("failed to clean user session: %v", err)
+		}
+	}
+	if err := iter.Err(); err != nil {
+		return fmt.Errorf("failed to scan redis keys: %v", err)
+	}
+	return nil
+}
+
+// extractTokenFromHeader extracts the token from the Authorization header
+func extractTokenFromHeader(authHeader string) (string, error) {
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+	if tokenString == "" {
+		return "", fmt.Errorf("missing authorization token")
+	}
+	return tokenString, nil
 }

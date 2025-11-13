@@ -22,4 +22,8 @@ Content-Type: application/json
 
 ### Get User Profile
 GET http://localhost:8080/users/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMwNTAzMzh9.gvkciYh3E3g_BrnGtqB2UdIhxGS0EpDhTFb3o8uf8jk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMxMTk5NjN9.Nfq0c7D8rMJuEt8Do-Iwm27tLRl4_kXbnxuukuT5SAo
+
+### Logout User
+POST http://localhost:8080/users/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMxMTk5NjN9.Nfq0c7D8rMJuEt8Do-Iwm27tLRl4_kXbnxuukuT5SAo

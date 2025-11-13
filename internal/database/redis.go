@@ -37,3 +37,7 @@ func ConnectRedis() *redis.Client {
 
 	return RedisClient
 }
+
+func GetRedisClient() *redis.Client {
+	return RedisClient
+}

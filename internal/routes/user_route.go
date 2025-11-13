@@ -13,6 +13,7 @@ func SetupUserRoute(mux *http.ServeMux, handler *handlers.Handler) {
 	userMux.HandleFunc("POST /register", handler.CreateUserHandler())
 	userMux.HandleFunc("POST /login", handler.LoginUserHandler())
 	userMux.Handle("GET /profile", auth.AuthMiddleware(handler.UserProfileHandler()))
+	userMux.Handle("POST /logout", auth.AuthMiddleware(handler.LogoutUserHandler()))
 
 	mux.Handle("/users/", http.StripPrefix("/users", userMux))
 }
