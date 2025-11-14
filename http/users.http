@@ -6,8 +6,8 @@ POST http://localhost:8080/users/register
 Content-Type: application/json
 
 {
-    "username": "test123",
-    "email": "test123@test.com",
+    "username": "test",
+    "email": "test@test.com",
     "password": "test1234"
 }
 
@@ -16,18 +16,18 @@ POST http://localhost:8080/users/login
 Content-Type: application/json
 
 {
-    "email": "test123@test.com",
+    "email": "test@test.com",
     "password": "test1234"
 }
 
 ### Get User Profile
 GET http://localhost:8080/users/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMxMTk5NjN9.Nfq0c7D8rMJuEt8Do-Iwm27tLRl4_kXbnxuukuT5SAo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6InRlc3QiLCJleHAiOjE3NjMyMjY4Nzl9.ez7cg-Z_tnhfitJJxN0s8GTA7uoJUw6bxqEZKSLUjsY
 
 ### Logout User
 POST http://localhost:8080/users/logout
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMxMTk5NjN9.Nfq0c7D8rMJuEt8Do-Iwm27tLRl4_kXbnxuukuT5SAo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMyMjUzNTJ9.Tz1miWfo3bRpcQqKd7ogLcHUsG38hCFYA-ixb4mY5_E
 
 ### List All Users
 GET http://localhost:8080/users/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMxMjE2Njl9.oSbnmTuxy-bW4YV8dH3zIIXddP4jVBrMxE5b_4IkbSc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMyMjUzNTJ9.Tz1miWfo3bRpcQqKd7ogLcHUsG38hCFYA-ixb4mY5_E

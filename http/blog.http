@@ -1,0 +1,19 @@
+### Create Blog
+POST http://localhost:8080/blogs/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMyMjUzNTJ9.Tz1miWfo3bRpcQqKd7ogLcHUsG38hCFYA-ixb4mY5_E
+
+{
+    "title": "Test Blog",
+    "content": "This is a test blog"
+}
+
+### Get Blog
+GET http://localhost:8080/blogs/3
+
+### Delete Blog
+DELETE http://localhost:8080/blogs/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6InRlc3QxMjMiLCJleHAiOjE3NjMyMjMxMTd9.u4mj4G1CKE9jSF56T8yhzc_QZNCvwNMERmZNAQOaEv0
+
+### List Blogs
+GET http://localhost:8080/blogs/

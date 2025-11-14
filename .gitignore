@@ -3,3 +3,6 @@
 .idea/
 bin/
 tmp/
+build
+build/
+build/**
