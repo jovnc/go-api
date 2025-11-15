@@ -55,14 +55,11 @@ func main() {
 	// Setup handler
 	handler := handler.NewHandler(database.GetDB(), redisClient)
 
-	// Setup routes
-	route.SetupRoutes(mux, handler)
-
 	// Server instance
 	serverAddr := fmt.Sprintf(":%s", config.ServerPort)
 	server := &http.Server{
 		Addr:    serverAddr,
-		Handler: mux,
+		Handler: route.SetupRoutes(mux, handler),
 	}
 
 	// Setup graceful shutdown
