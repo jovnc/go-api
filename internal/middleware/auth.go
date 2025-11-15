@@ -1,4 +1,4 @@
-package auth
+package middleware
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 	"go_api/internal/config"
 	"go_api/internal/database"
-	"go_api/internal/utils"
+	"go_api/internal/util"
 )
 
 type contextKey string
@@ -22,13 +22,13 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		// Get Authorization header
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			utils.ResponseWithError(w, http.StatusUnauthorized, "Missing Authorization header", "Authorization header is required")
+			util.ResponseWithError(w, http.StatusUnauthorized, "Missing Authorization header", "Authorization header is required")
 			return
 		}
 
 		// Bearer token
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		claims := &utils.Claims{}
+		claims := &util.Claims{}
 
 		// Parse token
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
@@ -36,28 +36,28 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		})
 		if err != nil {
 			if errors.Is(err, jwt.ErrSignatureInvalid) {
-				utils.ResponseWithError(w, http.StatusUnauthorized, "Signature invalid", "Signature invalid")
+				util.ResponseWithError(w, http.StatusUnauthorized, "Signature invalid", "Signature invalid")
 			}
-			utils.ResponseWithError(w, http.StatusUnauthorized, "Invalid token", err.Error())
+			util.ResponseWithError(w, http.StatusUnauthorized, "Invalid token", err.Error())
 			return
 		}
 
 		// Validate token
 		if !token.Valid {
-			utils.ResponseWithError(w, http.StatusUnauthorized, "Invalid token", "Token is invalid")
+			util.ResponseWithError(w, http.StatusUnauthorized, "Invalid token", "Token is invalid")
 			return
 		}
 
 		// Check if token is blacklisted from Redis
 		redisClient := database.GetRedisClient()
 		if redisClient == nil {
-			utils.ResponseWithError(w, http.StatusInternalServerError, "Failed to get Redis client", "Failed to get Redis client")
+			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to get Redis client", "Failed to get Redis client")
 			return
 		}
 
 		isBlacklisted, err := redisClient.Get(r.Context(), tokenString).Result()
 		if err == nil && isBlacklisted == "blacklisted" {
-			utils.ResponseWithError(w, http.StatusUnauthorized, "Token is blacklisted", "Token is blacklisted")
+			util.ResponseWithError(w, http.StatusUnauthorized, "Token is blacklisted", "Token is blacklisted")
 			return
 		}
 

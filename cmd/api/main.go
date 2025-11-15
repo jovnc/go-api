@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -8,13 +9,17 @@ import (
 	"os/signal"
 	"syscall"
 
+	"go_api/internal/app/handler"
+	"go_api/internal/app/route"
 	serverconfig "go_api/internal/config"
 	"go_api/internal/database"
-	"go_api/internal/handlers"
-	"go_api/internal/routes"
 )
 
 func main() {
+	// Parse command-line flags
+	migrateOnly := flag.Bool("migrate-only", false, "Run database migrations and exit")
+	flag.Parse()
+
 	// Load config
 	config, err := serverconfig.LoadConfig()
 	if err != nil {
@@ -27,9 +32,14 @@ func main() {
 	}
 	defer database.Close()
 
-	// Run migrations
-	if err := database.Migrate(); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+	// Run migrations (if flag is set)
+	if *migrateOnly {
+		log.Println("Running database migrations...")
+		if err := database.Migrate(); err != nil {
+			log.Fatalf("Failed to run migrations: %v", err)
+		}
+		log.Println("Migrations completed successfully")
+		return
 	}
 
 	// Connect to Redis
@@ -43,10 +53,10 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Setup handler
-	handler := handlers.NewHandler(database.GetDB(), redisClient)
+	handler := handler.NewHandler(database.GetDB(), redisClient)
 
 	// Setup routes
-	routes.SetupRoutes(mux, handler)
+	route.SetupRoutes(mux, handler)
 
 	// Server instance
 	serverAddr := fmt.Sprintf(":%s", config.ServerPort)

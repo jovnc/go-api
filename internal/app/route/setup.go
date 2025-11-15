@@ -1,12 +1,12 @@
-package routes
+package route
 
 import (
 	"net/http"
 
-	"go_api/internal/handlers"
+	"go_api/internal/app/handler"
 )
 
-func SetupRoutes(mux *http.ServeMux, handler *handlers.Handler) {
+func SetupRoutes(mux *http.ServeMux, handler *handler.Handler) {
 	SetupHealthRoute(mux, handler)
 	SetupUserRoute(mux, handler)
 	SetupBlogRoute(mux, handler)

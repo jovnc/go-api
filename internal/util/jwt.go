@@ -1,4 +1,4 @@
-package utils
+package util
 
 import (
 	"time"
@@ -7,7 +7,7 @@ import (
 )
 
 type Claims struct {
-	UserID uint `json:"user_id"`
+	UserID   uint   `json:"user_id"`
 	Username string `json:"username"`
 	jwt.StandardClaims
 }
@@ -15,7 +15,7 @@ type Claims struct {
 // GenerateToken generates a new JWT token
 func GenerateToken(userID uint, username string, secret []byte) (string, error) {
 	claims := Claims{
-		UserID: userID,
+		UserID:   userID,
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),

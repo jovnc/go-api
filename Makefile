@@ -19,7 +19,7 @@ start:build
 
 migrate:
 	@echo "Migrating database..."
-	@go run ./cmd/api -migrate-only || go run -tags migrate ./cmd/api
+	@go run ./cmd/api -migrate-only
 
 clean:
 	@echo "Cleaning up..."

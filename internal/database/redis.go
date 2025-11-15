@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/redis/go-redis/v9/maintnotifications"
 )
 
 var RedisClient *redis.Client
@@ -23,9 +24,14 @@ func ConnectRedis() *redis.Client {
 
 	// Create Redis client
 	RedisClient = redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: password,
-		DB:       int(dbInt),
+		Addr:             addr,
+		Password:         password,
+		DB:               int(dbInt),
+		// Explicitly disable maintenance notifications
+		// This prevents the client from sending CLIENT MAINT_NOTIFICATIONS ON
+		MaintNotificationsConfig: &maintnotifications.Config{
+			Mode: maintnotifications.ModeDisabled,
+		},
 	})
 
 	// Test connection

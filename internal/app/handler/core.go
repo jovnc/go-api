@@ -1,4 +1,4 @@
-package handlers
+package handler
 
 import (
 	"github.com/redis/go-redis/v9"
@@ -6,13 +6,13 @@ import (
 )
 
 type Handler struct {
-	DB *gorm.DB
+	DB    *gorm.DB
 	Redis *redis.Client
 }
 
 func NewHandler(db *gorm.DB, redis *redis.Client) *Handler {
 	return &Handler{
-		DB: db,
+		DB:    db,
 		Redis: redis,
 	}
 }
