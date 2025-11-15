@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -16,6 +17,7 @@ type Config struct {
 	RedisAddr    string
 	RedisPassword string
 	RedisDB       string
+	RateLimit     int
 }
 
 var GlobalConfig *Config
@@ -35,6 +37,11 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("JWT_SECRET_KEY is required")
 	}
 
+	rateLimit, err := strconv.Atoi(getEnv("RATE_LIMIT", "100"))
+	if err != nil {
+		return nil, fmt.Errorf("RATE_LIMIT is not a valid integer: %v", err)
+	}
+
 	GlobalConfig = &Config{
 		ServerPort:   getEnv("SERVER_PORT", "8080"),
 		DatabaseURL:  databaseURL,
@@ -44,6 +51,7 @@ func LoadConfig() (*Config, error) {
 		RedisAddr:    getEnv("REDIS_ADDR", "localhost:6379"),
 		RedisPassword: getEnv("REDIS_PASSWORD", ""),
 		RedisDB:       getEnv("REDIS_DB", "0"),
+		RateLimit:     rateLimit,
 	}
 
 	return GlobalConfig, nil

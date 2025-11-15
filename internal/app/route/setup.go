@@ -17,6 +17,7 @@ func SetupRoutes(mux *http.ServeMux, handler *handler.Handler) http.Handler {
 	middlewares := []func(http.Handler) http.Handler{
 		middleware.LoggerMiddleware,
 		middleware.RecoveryMiddleware,
+		middleware.RateLimiterMiddleware,
 	}
 
 	// Wrap the mux with all middlewares in order

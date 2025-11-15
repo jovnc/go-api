@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	models2 "go_api/internal/app/model"
+	"go_api/internal/app/model"
 	"go_api/internal/config"
 
 	"gorm.io/driver/postgres"
@@ -52,8 +52,8 @@ func GetDB() *gorm.DB {
 // Migrate runs migrations for the database
 func Migrate() error {
 	err := DB.AutoMigrate(
-		&models2.User{},
-		&models2.Blog{},
+		&model.User{},
+		&model.Blog{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to migrate database: %w", err)

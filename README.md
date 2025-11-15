@@ -17,7 +17,7 @@ A simple REST API built with Go, featuring user authentication and management.
 - Go 1.25 or higher
 - PostgreSQL database
 - Redis server
-- Make (optional, for using Makefile commands)
+- Make (for running Makefile commands)
 
 ## Installation
 
@@ -32,9 +32,6 @@ cd go_api
 
 ```bash
 make deps
-# or
-go mod download
-go mod tidy
 ```
 
 3. Set up environment variables:
@@ -57,17 +54,12 @@ REDIS_DB=0
 
 ```bash
 make dev
-# or
-go tool air
 ```
 
 ### Production Mode
 
 ```bash
 make start
-# or
-make build
-./bin/gobin
 ```
 
 ### Database Migration
