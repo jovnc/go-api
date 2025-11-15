@@ -1,13 +1,17 @@
 # Go API
 
-A simple REST API built with Go, featuring user authentication and management.
+A simple production-ready REST API built with Go, featuring user authentication, blog management, and comprehensive middleware support.
 
 ## Features
 
 - User registration and authentication
-- JWT-based authentication
+- JWT-based authentication with token blacklisting
+- Blog management (create, read, list, delete)
 - PostgreSQL database integration
 - Redis integration for caching and session management
+- Request logging middleware
+- Panic recovery middleware
+- Rate limiting middleware
 - Health check endpoint
 - Graceful server shutdown
 - Hot reloading in development mode (using Air)
@@ -46,6 +50,7 @@ LOG_LEVEL=info
 REDIS_ADDR=localhost:6379
 REDIS_PASSWORD=
 REDIS_DB=0
+RATE_LIMIT=100
 ```
 
 ## Running the Application
@@ -89,7 +94,16 @@ make migrate
 
 - `POST /users/register` - Register a new user
 - `POST /users/login` - Login and get JWT token
+- `POST /users/logout` - Logout and blacklist token (requires authentication)
 - `GET /users/profile` - Get user profile (requires authentication)
+- `GET /users/` - List all users (requires authentication)
+
+### Blog Management
+
+- `POST /blogs/` - Create a new blog post (requires authentication)
+- `GET /blogs/{id}` - Get a blog post by ID
+- `GET /blogs/` - List all blog posts
+- `DELETE /blogs/{id}` - Delete a blog post (requires authentication, owner only)
 
 ## Project Structure
 
@@ -99,14 +113,16 @@ go_api/
 │   └── api/
 │       └── main.go          # Application entry point
 ├── internal/
-│   ├── auth/                # Authentication middleware
+│   ├── app/
+│   │   ├── dto/             # Data transfer objects
+│   │   ├── handler/         # HTTP handlers
+│   │   ├── model/           # Database models
+│   │   └── route/           # Route definitions
 │   ├── config/              # Configuration management
-│   ├── database/            # Database connection, migrations, and Redis
-│   ├── dto/                 # Data transfer objects
-│   ├── handlers/            # HTTP handlers
-│   ├── models/              # Database models
-│   ├── routes/              # Route definitions
-│   └── utils/               # Utility functions (JWT, password hashing, etc.)
+│   ├── middleware/          # Middlewares
+│   ├── storage/             # Database and Redis connections
+│   └── util/                # Utility functions
+├── http/                    # HTTP test files
 ├── Makefile                 # Build and run commands
 └── go.mod                   # Go module dependencies
 ```
@@ -120,3 +136,18 @@ go_api/
 - [Air](https://github.com/air-verse/air) - Live reload for Go applications
 - [godotenv](https://github.com/joho/godotenv) - Environment variable management
 - [validator](https://github.com/go-playground/validator) - Input validation
+- [httprate](https://github.com/go-chi/httprate) - Rate limiting middleware
+
+## Planned Enhancements
+
+- Add comprehensive test suite (unit tests, integration tests, etc.)
+- Add CORS middleware
+- Add HTTPS/TLS support
+- Add request timeout configuration
+- Add healthcheck for database and Redis
+- Add API documentation (Swagger/OpenAPI)
+- Add pagination for list endpoint
+- Add request/response structured logging
+- Add Docker support
+- Add CI/CD pipeline
+- Deployment to cloud provider
