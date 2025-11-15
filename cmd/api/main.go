@@ -12,7 +12,7 @@ import (
 	"go_api/internal/app/handler"
 	"go_api/internal/app/route"
 	serverconfig "go_api/internal/config"
-	"go_api/internal/database"
+	"go_api/internal/storage"
 )
 
 func main() {
@@ -27,15 +27,15 @@ func main() {
 	}
 
 	// Connect to database
-	if err := database.Connect(); err != nil {
+	if err := storage.Connect(); err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	defer database.Close()
+	defer storage.Close()
 
 	// Run migrations (if flag is set)
 	if *migrateOnly {
 		log.Println("Running database migrations...")
-		if err := database.Migrate(); err != nil {
+		if err := storage.Migrate(); err != nil {
 			log.Fatalf("Failed to run migrations: %v", err)
 		}
 		log.Println("Migrations completed successfully")
@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// Connect to Redis
-	redisClient := database.ConnectRedis()
+	redisClient := storage.ConnectRedis()
 	if redisClient == nil {
 		log.Fatalf("Failed to connect to Redis: %v", err)
 	}
@@ -53,7 +53,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Setup handler
-	handler := handler.NewHandler(database.GetDB(), redisClient)
+	handler := handler.NewHandler(storage.GetDB(), redisClient)
 
 	// Server instance
 	serverAddr := fmt.Sprintf(":%s", config.ServerPort)
@@ -72,7 +72,7 @@ func main() {
 		if err := server.Close(); err != nil {
 			log.Printf("Server shutdown error: %v", err)
 		}
-		database.Close()
+		storage.Close()
 		os.Exit(0)
 	}()
 

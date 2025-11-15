@@ -1,10 +1,11 @@
-package database
+package storage
 
 import (
 	"context"
-	"go_api/internal/config"
 	"log"
 	"strconv"
+
+	"go_api/internal/config"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/redis/go-redis/v9/maintnotifications"
@@ -24,9 +25,9 @@ func ConnectRedis() *redis.Client {
 
 	// Create Redis client
 	RedisClient = redis.NewClient(&redis.Options{
-		Addr:             addr,
-		Password:         password,
-		DB:               int(dbInt),
+		Addr:     addr,
+		Password: password,
+		DB:       int(dbInt),
 		// Explicitly disable maintenance notifications
 		// This prevents the client from sending CLIENT MAINT_NOTIFICATIONS ON
 		MaintNotificationsConfig: &maintnotifications.Config{

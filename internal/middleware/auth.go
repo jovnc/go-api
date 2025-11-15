@@ -9,7 +9,7 @@ import (
 	"github.com/golang-jwt/jwt"
 
 	"go_api/internal/config"
-	"go_api/internal/database"
+	"go_api/internal/storage"
 	"go_api/internal/util"
 )
 
@@ -49,7 +49,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		// Check if token is blacklisted from Redis
-		redisClient := database.GetRedisClient()
+		redisClient := storage.GetRedisClient()
 		if redisClient == nil {
 			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to get Redis client", "Failed to get Redis client")
 			return
