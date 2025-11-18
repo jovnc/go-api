@@ -9,15 +9,16 @@ import (
 )
 
 type Config struct {
-	ServerPort   string
-	DatabaseURL  string
-	Environment  string
-	LogLevel     string
-	JWTSecretKey string
-	RedisAddr    string
-	RedisPassword string
-	RedisDB       string
-	RateLimit     int
+	ServerPort        string
+	DatabaseURL       string
+	DatabaseURLPooler string
+	Environment       string
+	LogLevel          string
+	JWTSecretKey      string
+	RedisAddr         string
+	RedisPassword     string
+	RedisDB           string
+	RateLimit         int
 }
 
 var GlobalConfig *Config
@@ -32,6 +33,11 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("DATABASE_URL is required")
 	}
 
+	databaseURLPooler := getEnv("DATABASE_URL_POOLER", "")
+	if databaseURLPooler == "" {
+		return nil, fmt.Errorf("DATABASE_URL_POOLER is required")
+	}
+
 	jwtSecretKey := getEnv("JWT_SECRET_KEY", "")
 	if jwtSecretKey == "" {
 		return nil, fmt.Errorf("JWT_SECRET_KEY is required")
@@ -43,15 +49,16 @@ func LoadConfig() (*Config, error) {
 	}
 
 	GlobalConfig = &Config{
-		ServerPort:   getEnv("SERVER_PORT", "8080"),
-		DatabaseURL:  databaseURL,
-		Environment:  getEnv("ENVIRONMENT", "development"),
-		LogLevel:     getEnv("LOG_LEVEL", "info"),
-		JWTSecretKey: jwtSecretKey,
-		RedisAddr:    getEnv("REDIS_ADDR", "localhost:6379"),
-		RedisPassword: getEnv("REDIS_PASSWORD", ""),
-		RedisDB:       getEnv("REDIS_DB", "0"),
-		RateLimit:     rateLimit,
+		ServerPort:        getEnv("SERVER_PORT", "8080"),
+		DatabaseURL:       databaseURL,
+		DatabaseURLPooler: databaseURLPooler,
+		Environment:       getEnv("ENVIRONMENT", "development"),
+		LogLevel:          getEnv("LOG_LEVEL", "info"),
+		JWTSecretKey:      jwtSecretKey,
+		RedisAddr:         getEnv("REDIS_ADDR", "localhost:6379"),
+		RedisPassword:     getEnv("REDIS_PASSWORD", ""),
+		RedisDB:           getEnv("REDIS_DB", "0"),
+		RateLimit:         rateLimit,
 	}
 
 	return GlobalConfig, nil
