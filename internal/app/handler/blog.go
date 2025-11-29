@@ -33,12 +33,13 @@ func (h *Handler) CreateBlogHandler() http.HandlerFunc {
 			return
 		}
 
+		// Create blog
 		blog := &model.Blog{
 			Title:   req.Title,
 			Content: req.Content,
 			UserID:  claims.UserID,
 		}
-		if err := h.DB.WithContext(ctx).Create(blog).Error; err != nil {
+		if err := h.BlogRepository.CreateBlog(ctx, blog); err != nil {
 			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to create blog", err.Error())
 			return
 		}
@@ -58,8 +59,8 @@ func (h *Handler) GetBlogHandler() http.HandlerFunc {
 			return
 		}
 
-		blog := &model.Blog{}
-		if err := h.DB.WithContext(ctx).First(blog, id).Error; err != nil {
+		blog, err := h.BlogRepository.GetBlog(ctx, id)
+		if err != nil {
 			util.ResponseWithError(w, http.StatusNotFound, "Blog not found", err.Error())
 			return
 		}
@@ -79,13 +80,15 @@ func (h *Handler) DeleteBlogHandler() http.HandlerFunc {
 			return
 		}
 
+		// Get claims from context
 		claims, ok := ctx.Value(middleware.UserClaimsKey).(*util.Claims)
 		if !ok {
 			util.ResponseWithError(w, http.StatusUnauthorized, "Unauthorized", "Unauthorized")
 			return
 		}
 
-		result := h.DB.WithContext(ctx).Where("id = ? AND user_id = ?", id, claims.UserID).Delete(&model.Blog{})
+		// Delete blog
+		result := h.BlogRepository.DeleteBlog(ctx, id, claims.UserID)
 		if result.Error != nil {
 			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to delete blog", result.Error.Error())
 			return
@@ -105,8 +108,8 @@ func (h *Handler) ListBlogsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		blogs := []model.Blog{}
-		if err := h.DB.WithContext(ctx).Find(&blogs).Error; err != nil {
+		blogs, err := h.BlogRepository.ListBlogs(ctx)
+		if err != nil {
 			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to list blogs", err.Error())
 			return
 		}
