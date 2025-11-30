@@ -2,32 +2,26 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"go_api/internal/app/dto"
-	"go_api/internal/app/model"
-	"go_api/internal/app/repository"
+	"go_api/internal/app/service"
 	"go_api/internal/middleware"
 	"go_api/internal/util"
-
-	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
 )
 
 type BlogHandler struct {
-	repo *repository.BlogRepository
-	redis *redis.Client
+	service *service.BlogService
 }
 
-func NewBlogHandler(db *gorm.DB, redis *redis.Client) *BlogHandler {
-	repo := repository.NewBlogRepository(db)
+func NewBlogHandler(service *service.BlogService) *BlogHandler {
 	return &BlogHandler{
-		repo: repo,
-		redis: redis,
+		service: service,
 	}
 }
 
-// CreateBlog creates a new blog
+// CreateBlogHandler creates a new blog
 func (h *BlogHandler) CreateBlogHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -50,14 +44,14 @@ func (h *BlogHandler) CreateBlogHandler() http.HandlerFunc {
 			return
 		}
 
-		// Create blog
-		blog := &model.Blog{
-			Title:   req.Title,
-			Content: req.Content,
-			UserID:  claims.UserID,
-		}
-		if err := h.repo.CreateBlog(ctx, blog); err != nil {
-			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to create blog", err.Error())
+		// Create blog in blog service
+		blog, err := h.service.CreateBlog(ctx, req, claims.UserID)
+		if err != nil {
+			if errors.Is(err, service.ErrBlogCreation) {
+				util.ResponseWithError(w, http.StatusInternalServerError, "Failed to create blog", err.Error())
+			} else {
+				util.ResponseWithError(w, http.StatusInternalServerError, "Internal server error", err.Error())
+			}
 			return
 		}
 
@@ -76,9 +70,14 @@ func (h *BlogHandler) GetBlogHandler() http.HandlerFunc {
 			return
 		}
 
-		blog, err := h.repo.GetBlog(ctx, id)
+		// Get blog from blog service
+		blog, err := h.service.GetBlog(ctx, id)
 		if err != nil {
-			util.ResponseWithError(w, http.StatusNotFound, "Blog not found", err.Error())
+			if errors.Is(err, service.ErrBlogNotFound) {
+				util.ResponseWithError(w, http.StatusNotFound, "Blog not found", err.Error())
+			} else {
+				util.ResponseWithError(w, http.StatusInternalServerError, "Internal server error", err.Error())
+			}
 			return
 		}
 
@@ -104,9 +103,14 @@ func (h *BlogHandler) DeleteBlogHandler() http.HandlerFunc {
 			return
 		}
 
-		// Delete blog
-		if err := h.repo.DeleteBlog(ctx, id, claims.UserID); err != nil {
-			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to delete blog", err.Error())
+		// Delete blog from blog service
+		err := h.service.DeleteBlog(ctx, id, claims.UserID)
+		if err != nil {
+			if errors.Is(err, service.ErrBlogDeletion) {
+				util.ResponseWithError(w, http.StatusInternalServerError, "Failed to delete blog", err.Error())
+			} else {
+				util.ResponseWithError(w, http.StatusInternalServerError, "Internal server error", err.Error())
+			}
 			return
 		}
 
@@ -119,7 +123,8 @@ func (h *BlogHandler) ListBlogsHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		blogs, err := h.repo.ListBlogs(ctx)
+		// List all blogs from blog service
+		blogs, err := h.service.ListBlogs(ctx)
 		if err != nil {
 			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to list blogs", err.Error())
 			return

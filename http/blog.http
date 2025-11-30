@@ -1,7 +1,7 @@
 ### Create Blog
 POST http://localhost:8080/blogs/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6InRlc3QiLCJleHAiOjE3NjQ2MDUwOTJ9.7UtI1HKgrX6WFUjDSE7qtj0igoEdfd_CfijvsqIjgbI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1LCJ1c2VybmFtZSI6InRlc3QyIiwiZXhwIjoxNzY0NjA2MzYxfQ.dsVfyv3m6JbKPdmuFQSCfyFMBkmpGAxUwTJAzRU3faY
 
 {
     "title": "Test Blog",
@@ -9,11 +9,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c
 }
 
 ### Get Blog
-GET http://localhost:8080/blogs/1
+GET http://localhost:8080/blogs/5
 
 ### Delete Blog
-DELETE http://localhost:8080/blogs/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6InRlc3QiLCJleHAiOjE3NjQ2MDUwOTJ9.7UtI1HKgrX6WFUjDSE7qtj0igoEdfd_CfijvsqIjgbI
+DELETE http://localhost:8080/blogs/5
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1LCJ1c2VybmFtZSI6InRlc3QyIiwiZXhwIjoxNzY0NjA2MzYxfQ.dsVfyv3m6JbKPdmuFQSCfyFMBkmpGAxUwTJAzRU3faY
 
 ### List Blogs
 GET http://localhost:8080/blogs/

@@ -33,6 +33,7 @@ func (h *UserHandler) UserProfileHandler() http.HandlerFunc {
 			return
 		}
 
+		// Get user profile from user service
 		user, fromCache, err := h.service.GetUserProfile(ctx, claims.UserID)
 		if err != nil {
 			switch {
@@ -70,6 +71,7 @@ func (h *UserHandler) CreateUserHandler() http.HandlerFunc {
 			return
 		}
 
+		// Create user in user service
 		user, err := h.service.CreateUser(ctx, req)
 		if err != nil {
 			switch {
@@ -103,6 +105,7 @@ func (h *UserHandler) LoginUserHandler() http.HandlerFunc {
 			return
 		}
 
+		// Login user in user service
 		token, err := h.service.LoginUser(ctx, req)
 		if err != nil {
 			switch {
@@ -149,6 +152,7 @@ func (h *UserHandler) LogoutUserHandler() http.HandlerFunc {
 			return
 		}
 
+		// Logout user in user service
 		err = h.service.LogoutUser(ctx, claims.UserID, token, claims.ExpiresAt)
 		if err != nil {
 			switch {
@@ -170,6 +174,8 @@ func (h *UserHandler) LogoutUserHandler() http.HandlerFunc {
 func (h *UserHandler) ListAllUsersHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
+
+		// List all users from user service
 		users, err := h.service.ListAllUsers(ctx)
 		if err != nil {
 			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to list users", err.Error())

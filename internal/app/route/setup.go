@@ -14,10 +14,11 @@ import (
 func SetupRoutes(mux *http.ServeMux, db *gorm.DB, redis *redis.Client) http.Handler {
 
 	// Create services
+	blogService := service.NewBlogService(db)
 	userService := service.NewUserService(db, redis)
 
 	// Create handlers
-	blogHandler := handler.NewBlogHandler(db, redis)
+	blogHandler := handler.NewBlogHandler(blogService)
 	userHandler := handler.NewUserHandler(userService)
 	handler := handler.NewHandler()
 
