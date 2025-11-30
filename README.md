@@ -7,8 +7,6 @@ A simple production-ready REST API built with Go, featuring user authentication,
 - User registration and authentication
 - JWT-based authentication with token blacklisting
 - Blog management (create, read, list, delete)
-- PostgreSQL database integration
-- Redis integration for caching and session management
 - Request logging middleware
 - Panic recovery middleware
 - Rate limiting middleware
@@ -38,20 +36,7 @@ cd go_api
 make deps
 ```
 
-3. Set up environment variables:
-   Create a `.env` file in the root directory with the following variables:
-
-```env
-DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
-JWT_SECRET_KEY=your-secret-key-here
-SERVER_PORT=8080
-ENVIRONMENT=development
-LOG_LEVEL=info
-REDIS_ADDR=localhost:6379
-REDIS_PASSWORD=
-REDIS_DB=0
-RATE_LIMIT=100
-```
+3. Set up environment variables: rename the `.env.example` file to `.env` and fill in the values.
 
 ## Running the Application
 
@@ -68,6 +53,8 @@ make start
 ```
 
 ### Database Migration
+
+Always run migrations after database schema changes.
 
 ```bash
 make migrate
@@ -104,28 +91,6 @@ make migrate
 - `GET /blogs/{id}` - Get a blog post by ID
 - `GET /blogs/` - List all blog posts
 - `DELETE /blogs/{id}` - Delete a blog post (requires authentication, owner only)
-
-## Project Structure
-
-```
-go_api/
-├── cmd/
-│   └── api/
-│       └── main.go          # Application entry point
-├── internal/
-│   ├── app/
-│   │   ├── dto/             # Data transfer objects
-│   │   ├── handler/         # HTTP handlers
-│   │   ├── model/           # Database models
-│   │   └── route/           # Route definitions
-│   ├── config/              # Configuration management
-│   ├── middleware/          # Middlewares
-│   ├── storage/             # Database and Redis connections
-│   └── util/                # Utility functions
-├── http/                    # HTTP test files
-├── Makefile                 # Build and run commands
-└── go.mod                   # Go module dependencies
-```
 
 ## Technologies Used
 
