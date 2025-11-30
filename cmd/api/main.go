@@ -9,8 +9,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"go_api/internal/app/handler"
-	"go_api/internal/app/repository"
 	"go_api/internal/app/route"
 	serverconfig "go_api/internal/config"
 	"go_api/internal/storage"
@@ -53,18 +51,11 @@ func main() {
 	// Set up HTTP server
 	mux := http.NewServeMux()
 
-	// Create repositories
-	// TODO: is there a better way to do this?
-	blogRepository := repository.NewBlogRepository(storage.GetDB())
-
-	// Setup handler
-	handler := handler.NewHandler(storage.GetDB(), blogRepository, redisClient)
-
 	// Server instance
 	serverAddr := fmt.Sprintf(":%s", config.ServerPort)
 	server := &http.Server{
 		Addr:    serverAddr,
-		Handler: route.SetupRoutes(mux, handler),
+		Handler: route.SetupRoutes(mux, storage.GetDB(), redisClient),
 	}
 
 	// Setup graceful shutdown

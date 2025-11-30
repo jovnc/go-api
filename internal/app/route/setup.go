@@ -5,13 +5,21 @@ import (
 
 	"go_api/internal/app/handler"
 	"go_api/internal/middleware"
+
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
-func SetupRoutes(mux *http.ServeMux, handler *handler.Handler) http.Handler {
+func SetupRoutes(mux *http.ServeMux, db *gorm.DB, redis *redis.Client) http.Handler {
+
+	// Create handlers
+	blogHandler := handler.NewBlogHandler(db, redis)
+	handler := handler.NewHandler(db, redis)
+
 	// Register routes
 	SetupHealthRoute(mux, handler)
 	SetupUserRoute(mux, handler)
-	SetupBlogRoute(mux, handler)
+	SetupBlogRoute(mux, blogHandler)
 
 	// Create middleware chain
 	middlewares := []func(http.Handler) http.Handler{
