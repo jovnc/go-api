@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"go_api/internal/app/handler"
+	"go_api/internal/app/service"
 	"go_api/internal/middleware"
 
 	"github.com/redis/go-redis/v9"
@@ -12,10 +13,13 @@ import (
 
 func SetupRoutes(mux *http.ServeMux, db *gorm.DB, redis *redis.Client) http.Handler {
 
+	// Create services
+	userService := service.NewUserService(db, redis)
+
 	// Create handlers
 	blogHandler := handler.NewBlogHandler(db, redis)
-	userHandler := handler.NewUserHandler(db, redis)
-	handler := handler.NewHandler(db, redis)
+	userHandler := handler.NewUserHandler(userService)
+	handler := handler.NewHandler()
 
 	// Register routes
 	SetupHealthRoute(mux, handler)
