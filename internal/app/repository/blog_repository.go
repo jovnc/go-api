@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"go_api/internal/app/model"
 
 	"gorm.io/gorm"
@@ -27,8 +28,15 @@ func (r *BlogRepository) GetBlog(ctx context.Context, id string) (*model.Blog, e
 	return &blog, nil
 }
 
-func (r *BlogRepository) DeleteBlog(ctx context.Context, id string, userID uint) *gorm.DB {
-	return r.db.WithContext(ctx).Where("id = ? AND user_id = ?", id, userID).Delete(&model.Blog{})
+func (r *BlogRepository) DeleteBlog(ctx context.Context, id string, userID uint) error {
+	result := r.db.WithContext(ctx).Where("id = ? AND user_id = ?", id, userID).Delete(&model.Blog{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("blog not found")
+	}
+	return nil
 }
 
 func (r *BlogRepository) ListBlogs(ctx context.Context) ([]model.Blog, error) {

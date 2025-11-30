@@ -21,7 +21,10 @@ type BlogHandler struct {
 
 func NewBlogHandler(db *gorm.DB, redis *redis.Client) *BlogHandler {
 	repo := repository.NewBlogRepository(db)
-	return &BlogHandler{repo: repo}
+	return &BlogHandler{
+		repo: repo,
+		redis: redis,
+	}
 }
 
 // CreateBlog creates a new blog
@@ -102,14 +105,8 @@ func (h *BlogHandler) DeleteBlogHandler() http.HandlerFunc {
 		}
 
 		// Delete blog
-		result := h.repo.DeleteBlog(ctx, id, claims.UserID)
-		if result.Error != nil {
-			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to delete blog", result.Error.Error())
-			return
-		}
-
-		if result.RowsAffected == 0 {
-			util.ResponseWithError(w, http.StatusNotFound, "Blog not found", "Blog not found or you don't have permission to delete it")
+		if err := h.repo.DeleteBlog(ctx, id, claims.UserID); err != nil {
+			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to delete blog", err.Error())
 			return
 		}
 

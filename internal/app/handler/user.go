@@ -10,13 +10,30 @@ import (
 
 	"go_api/internal/app/dto"
 	"go_api/internal/app/model"
+	"go_api/internal/app/repository"
 	"go_api/internal/config"
 	"go_api/internal/middleware"
 	"go_api/internal/util"
+
+	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 )
 
+type UserHandler struct {
+	repo *repository.UserRepository
+	redis *redis.Client
+}
+
+func NewUserHandler(db *gorm.DB, redis *redis.Client) *UserHandler {
+	repo := repository.NewUserRepository(db)
+	return &UserHandler{
+		repo: repo,
+		redis: redis,
+	}
+}
+
 // UserProfileHandler returns the user profile
-func (h *Handler) UserProfileHandler() http.HandlerFunc {
+func (h *UserHandler) UserProfileHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -29,7 +46,7 @@ func (h *Handler) UserProfileHandler() http.HandlerFunc {
 
 		// Get user from Redis (if exists)
 		cacheKey := fmt.Sprintf("user:%d", claims.UserID)
-		if cached, err := h.Redis.Get(ctx, cacheKey).Result(); err == nil {
+		if cached, err := h.redis.Get(ctx, cacheKey).Result(); err == nil {
 			var user model.User
 			if err := json.Unmarshal([]byte(cached), &user); err == nil {
 				util.ResponseWithSuccess(w, http.StatusOK, "User profile (from cache)", user)
@@ -38,8 +55,8 @@ func (h *Handler) UserProfileHandler() http.HandlerFunc {
 		}
 
 		// Get user from database
-		user := &model.User{}
-		if err := h.DB.WithContext(ctx).Where("id = ?", claims.UserID).First(user).Error; err != nil {
+		user, err := h.repo.FindByID(ctx, claims.UserID)
+		if err != nil {
 			util.ResponseWithError(w, http.StatusNotFound, "User not found", err.Error())
 			return
 		}
@@ -47,7 +64,7 @@ func (h *Handler) UserProfileHandler() http.HandlerFunc {
 		// Cache user in Redis
 		userJSON, err := json.Marshal(user)
 		if err == nil {
-			h.Redis.Set(ctx, cacheKey, userJSON, time.Minute*5)
+			h.redis.Set(ctx, cacheKey, userJSON, time.Minute*5)
 		}
 
 		util.ResponseWithSuccess(w, http.StatusOK, "User profile (from database)", user)
@@ -55,7 +72,7 @@ func (h *Handler) UserProfileHandler() http.HandlerFunc {
 }
 
 // CreateUserHandler creates a new user
-func (h *Handler) CreateUserHandler() http.HandlerFunc {
+func (h *UserHandler) CreateUserHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		var req dto.CreateUserRequest
@@ -83,7 +100,7 @@ func (h *Handler) CreateUserHandler() http.HandlerFunc {
 			Password: hashedPassword,
 		}
 
-		if err := h.DB.WithContext(ctx).Create(user).Error; err != nil {
+		if err := h.repo.Create(ctx, user); err != nil {
 			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to create user", err.Error())
 			return
 		}
@@ -93,7 +110,7 @@ func (h *Handler) CreateUserHandler() http.HandlerFunc {
 }
 
 // LoginUserHandler logs in a user
-func (h *Handler) LoginUserHandler() http.HandlerFunc {
+func (h *UserHandler) LoginUserHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		var req dto.LoginUserRequest
@@ -109,8 +126,8 @@ func (h *Handler) LoginUserHandler() http.HandlerFunc {
 		}
 
 		// Fetch user from DB
-		user := &model.User{}
-		if err := h.DB.WithContext(ctx).Where("email = ?", req.Email).First(user).Error; err != nil {
+		user, err := h.repo.FindByEmail(ctx, req.Email)
+		if err != nil {
 			util.ResponseWithError(w, http.StatusNotFound, "User not found", err.Error())
 			return
 		}
@@ -136,7 +153,7 @@ func (h *Handler) LoginUserHandler() http.HandlerFunc {
 }
 
 // LogoutUserHandler logs out a user
-func (h *Handler) LogoutUserHandler() http.HandlerFunc {
+func (h *UserHandler) LogoutUserHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -171,7 +188,7 @@ func (h *Handler) LogoutUserHandler() http.HandlerFunc {
 		}
 
 		// Blacklist token from Redis
-		err = h.Redis.Set(ctx, token, "blacklisted", ttl).Err()
+		err = h.redis.Set(ctx, token, "blacklisted", ttl).Err()
 		if err != nil {
 			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to blacklist token", err.Error())
 			return
@@ -189,11 +206,11 @@ func (h *Handler) LogoutUserHandler() http.HandlerFunc {
 }
 
 // ListAllUsersHandler lists all users (with optional pagination)
-func (h *Handler) ListAllUsersHandler() http.HandlerFunc {
+func (h *UserHandler) ListAllUsersHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		users := []model.User{}
-		if err := h.DB.WithContext(ctx).Find(&users).Error; err != nil {
+		users, err := h.repo.ListAllUsers(ctx)
+		if err != nil {
 			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to list users", err.Error())
 			return
 		}
@@ -204,11 +221,11 @@ func (h *Handler) ListAllUsersHandler() http.HandlerFunc {
 // Helper functions
 
 // cleanUserSession cleans the user session from Redis
-func (h *Handler) cleanUserSession(ctx context.Context, userIdStr string) error {
-	iter := h.Redis.Scan(ctx, 0, userIdStr+"*", 0).Iterator()
+func (h *UserHandler) cleanUserSession(ctx context.Context, userIdStr string) error {
+	iter := h.redis.Scan(ctx, 0, userIdStr+"*", 0).Iterator()
 	for iter.Next(ctx) {
 		key := iter.Val()
-		if err := h.Redis.Del(ctx, key).Err(); err != nil {
+		if err := h.redis.Del(ctx, key).Err(); err != nil {
 			return fmt.Errorf("failed to clean user session: %v", err)
 		}
 	}

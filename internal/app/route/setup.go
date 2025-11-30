@@ -14,11 +14,12 @@ func SetupRoutes(mux *http.ServeMux, db *gorm.DB, redis *redis.Client) http.Hand
 
 	// Create handlers
 	blogHandler := handler.NewBlogHandler(db, redis)
+	userHandler := handler.NewUserHandler(db, redis)
 	handler := handler.NewHandler(db, redis)
 
 	// Register routes
 	SetupHealthRoute(mux, handler)
-	SetupUserRoute(mux, handler)
+	SetupUserRoute(mux, userHandler)
 	SetupBlogRoute(mux, blogHandler)
 
 	// Create middleware chain
