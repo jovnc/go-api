@@ -1,13 +1,13 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
+	"go_api/internal/app/cache"
 	"go_api/internal/app/dto"
 	"go_api/internal/app/model"
 	"go_api/internal/app/repository"
@@ -21,14 +21,15 @@ import (
 
 type UserHandler struct {
 	repo *repository.UserRepository
-	redis *redis.Client
+	cache *cache.UserCache
 }
 
 func NewUserHandler(db *gorm.DB, redis *redis.Client) *UserHandler {
 	repo := repository.NewUserRepository(db)
+	cache := cache.NewUserCache(redis)
 	return &UserHandler{
 		repo: repo,
-		redis: redis,
+		cache: cache,
 	}
 }
 
@@ -45,26 +46,24 @@ func (h *UserHandler) UserProfileHandler() http.HandlerFunc {
 		}
 
 		// Get user from Redis (if exists)
-		cacheKey := fmt.Sprintf("user:%d", claims.UserID)
-		if cached, err := h.redis.Get(ctx, cacheKey).Result(); err == nil {
-			var user model.User
-			if err := json.Unmarshal([]byte(cached), &user); err == nil {
-				util.ResponseWithSuccess(w, http.StatusOK, "User profile (from cache)", user)
-				return
-			}
+		user, err := h.cache.GetUser(ctx, claims.UserID)
+		if err == nil && user != nil {
+			util.ResponseWithSuccess(w, http.StatusOK, "User profile (from cache)", user)
+			return
 		}
 
 		// Get user from database
-		user, err := h.repo.FindByID(ctx, claims.UserID)
+		user, err = h.repo.FindByID(ctx, claims.UserID)
 		if err != nil {
 			util.ResponseWithError(w, http.StatusNotFound, "User not found", err.Error())
 			return
 		}
 
 		// Cache user in Redis
-		userJSON, err := json.Marshal(user)
-		if err == nil {
-			h.redis.Set(ctx, cacheKey, userJSON, time.Minute*5)
+		err = h.cache.SetUser(ctx, claims.UserID, user)
+		if err != nil {
+			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to cache user", err.Error())
+			return
 		}
 
 		util.ResponseWithSuccess(w, http.StatusOK, "User profile (from database)", user)
@@ -188,15 +187,14 @@ func (h *UserHandler) LogoutUserHandler() http.HandlerFunc {
 		}
 
 		// Blacklist token from Redis
-		err = h.redis.Set(ctx, token, "blacklisted", ttl).Err()
+		err = h.cache.BlacklistToken(ctx, token)
 		if err != nil {
 			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to blacklist token", err.Error())
 			return
 		}
 
 		// Clean user profile data from Redis
-		userIdStr := fmt.Sprintf("user:%d", claims.UserID)
-		if err := h.cleanUserSession(ctx, userIdStr); err != nil {
+		if err := h.cache.CleanUserSession(ctx, claims.UserID); err != nil {
 			util.ResponseWithError(w, http.StatusInternalServerError, "Failed to clean user session", err.Error())
 			return
 		}
@@ -219,21 +217,6 @@ func (h *UserHandler) ListAllUsersHandler() http.HandlerFunc {
 }
 
 // Helper functions
-
-// cleanUserSession cleans the user session from Redis
-func (h *UserHandler) cleanUserSession(ctx context.Context, userIdStr string) error {
-	iter := h.redis.Scan(ctx, 0, userIdStr+"*", 0).Iterator()
-	for iter.Next(ctx) {
-		key := iter.Val()
-		if err := h.redis.Del(ctx, key).Err(); err != nil {
-			return fmt.Errorf("failed to clean user session: %v", err)
-		}
-	}
-	if err := iter.Err(); err != nil {
-		return fmt.Errorf("failed to scan redis keys: %v", err)
-	}
-	return nil
-}
 
 // extractTokenFromHeader extracts the token from the Authorization header
 func extractTokenFromHeader(authHeader string) (string, error) {
