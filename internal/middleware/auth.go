@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 
 	"go_api/internal/config"
 	"go_api/internal/storage"
@@ -28,14 +28,14 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		// Bearer token
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		claims := &util.Claims{}
+		claims := &util.UserClaims{}
 
 		// Parse token
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(config.GlobalConfig.JWTSecretKey), nil
 		})
 		if err != nil {
-			if errors.Is(err, jwt.ErrSignatureInvalid) {
+			if errors.Is(err, jwt.ErrTokenSignatureInvalid) {
 				util.ResponseWithError(w, http.StatusUnauthorized, "Signature invalid", "Signature invalid")
 			}
 			util.ResponseWithError(w, http.StatusUnauthorized, "Invalid token", err.Error())

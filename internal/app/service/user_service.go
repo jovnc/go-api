@@ -12,6 +12,7 @@ import (
 	"go_api/internal/config"
 	"go_api/internal/util"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
@@ -101,15 +102,15 @@ func (s *UserService) LoginUser(ctx context.Context, req dto.LoginUserRequest) (
 }
 
 // LogoutUser blacklists the token and cleans user session
-func (s *UserService) LogoutUser(ctx context.Context, userID uint, token string, expiresAt int64) error {
-	// Calculate TTL
-	expirationTime := time.Unix(expiresAt, 0)
-	now := time.Now()
-	ttl := expirationTime.Sub(now)
-
-	// If token is expired, set TTL to 5 minutes
-	if ttl <= 0 {
-		ttl = time.Minute * 5
+func (s *UserService) LogoutUser(ctx context.Context, userID uint, token string, expiresAt *jwt.NumericDate) error {
+	// Calculate TTL - default to 5 minutes if expiration is not set
+	ttl := time.Minute * 5
+	if expiresAt != nil {
+		ttl = time.Until(expiresAt.Time)
+		// If token is expired, use default TTL
+		if ttl <= 0 {
+			ttl = time.Minute * 5
+		}
 	}
 
 	// Blacklist token

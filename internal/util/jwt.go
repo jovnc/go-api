@@ -5,22 +5,23 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 )
 
-type Claims struct {
-	UserID   uint   `json:"user_id"`
+type UserClaims struct {
 	Username string `json:"username"`
-	jwt.StandardClaims
+	UserID   uint    `json:"userId"`
+	jwt.RegisteredClaims
 }
 
 // GenerateToken generates a new JWT token
 func GenerateToken(userID uint, username string, secret []byte) (string, error) {
-	claims := Claims{
-		UserID:   userID,
+	claims := UserClaims{
 		Username: username,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+		UserID:   userID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 

@@ -27,7 +27,7 @@ func (h *UserHandler) UserProfileHandler() http.HandlerFunc {
 		ctx := r.Context()
 
 		// Get claims from context
-		claims, ok := ctx.Value(middleware.UserClaimsKey).(*util.Claims)
+		claims, ok := ctx.Value(middleware.UserClaimsKey).(*util.UserClaims)
 		if !ok {
 			util.ResponseWithError(w, http.StatusUnauthorized, "Unauthorized", "Unauthorized")
 			return
@@ -133,7 +133,7 @@ func (h *UserHandler) LogoutUserHandler() http.HandlerFunc {
 		ctx := r.Context()
 
 		// Get claims from context
-		claims, ok := ctx.Value(middleware.UserClaimsKey).(*util.Claims)
+		claims, ok := ctx.Value(middleware.UserClaimsKey).(*util.UserClaims)
 		if !ok {
 			util.ResponseWithError(w, http.StatusBadRequest, "Missing claims", "Missing claims")
 			return

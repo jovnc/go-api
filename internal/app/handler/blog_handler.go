@@ -38,7 +38,7 @@ func (h *BlogHandler) CreateBlogHandler() http.HandlerFunc {
 		}
 
 		// Get claims from context
-		claims, ok := ctx.Value(middleware.UserClaimsKey).(*util.Claims)
+		claims, ok := ctx.Value(middleware.UserClaimsKey).(*util.UserClaims)
 		if !ok {
 			util.ResponseWithError(w, http.StatusUnauthorized, "Unauthorized", "Unauthorized")
 			return
@@ -97,7 +97,7 @@ func (h *BlogHandler) DeleteBlogHandler() http.HandlerFunc {
 		}
 
 		// Get claims from context
-		claims, ok := ctx.Value(middleware.UserClaimsKey).(*util.Claims)
+		claims, ok := ctx.Value(middleware.UserClaimsKey).(*util.UserClaims)
 		if !ok {
 			util.ResponseWithError(w, http.StatusUnauthorized, "Unauthorized", "Unauthorized")
 			return
