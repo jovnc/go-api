@@ -10,9 +10,12 @@ A simple production-ready REST API built with Go, featuring user authentication,
 - Request logging middleware
 - Panic recovery middleware
 - Rate limiting middleware
+- CORS middleware
 - Health check endpoint
 - Graceful server shutdown
 - Hot reloading in development mode (using Air)
+- Docker and Docker Compose support
+- Github Actions CI/CD pipeline
 
 ## Prerequisites
 
@@ -105,11 +108,9 @@ docker-compose up -d
 ## Planned Enhancements
 
 - Add comprehensive test suite (unit tests, integration tests, etc.)
-- Add CORS middleware
 - Add HTTPS/TLS support
 - Add request timeout configuration
 - Add API documentation (Swagger/OpenAPI)
 - Add pagination for list endpoint
 - Add request/response structured logging
-- Add CI/CD pipeline
 - Deployment to cloud provider
