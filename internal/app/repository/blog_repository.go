@@ -46,5 +46,3 @@ func (r *BlogRepository) ListBlogs(ctx context.Context) ([]model.Blog, error) {
 	}
 	return blogs, nil
 }
-
-

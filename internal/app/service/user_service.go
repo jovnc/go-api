@@ -18,14 +18,14 @@ import (
 )
 
 var (
-	ErrUserNotFound     = errors.New("user not found")
-	ErrInvalidPassword  = errors.New("invalid password")
-	ErrTokenGeneration  = errors.New("failed to generate token")
-	ErrPasswordHashing  = errors.New("failed to hash password")
-	ErrUserCreation     = errors.New("failed to create user")
-	ErrCacheOperation   = errors.New("cache operation failed")
-	ErrTokenBlacklist   = errors.New("failed to blacklist token")
-	ErrSessionCleanup   = errors.New("failed to clean user session")
+	ErrUserNotFound    = errors.New("user not found")
+	ErrInvalidPassword = errors.New("invalid password")
+	ErrTokenGeneration = errors.New("failed to generate token")
+	ErrPasswordHashing = errors.New("failed to hash password")
+	ErrUserCreation    = errors.New("failed to create user")
+	ErrCacheOperation  = errors.New("cache operation failed")
+	ErrTokenBlacklist  = errors.New("failed to blacklist token")
+	ErrSessionCleanup  = errors.New("failed to clean user session")
 )
 
 type UserService struct {

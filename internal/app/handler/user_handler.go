@@ -184,4 +184,3 @@ func (h *UserHandler) ListAllUsersHandler() http.HandlerFunc {
 		util.ResponseWithSuccess(w, http.StatusOK, "List of all users", users)
 	}
 }
-
