@@ -32,6 +32,7 @@ func SetupRoutes(mux *http.ServeMux, db *gorm.DB, redis *redis.Client) http.Hand
 		middleware.LoggerMiddleware,
 		middleware.RecoveryMiddleware,
 		middleware.RateLimiterMiddleware,
+		middleware.CorsMiddleware,
 	}
 
 	// Wrap the mux with all middlewares in order
