@@ -7,10 +7,37 @@ services:
       - .env
     environment:
       - REDIS_ADDR=redis:6379
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/go_api?sslmode=disable
+      - DATABASE_URL_POOLER=postgresql://postgres:postgres@postgres:5432/go_api?sslmode=disable&pgbouncer=true
+    volumes:
+      - .:/app
     depends_on:
-      - redis
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
 
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
+
+  postgres:
+    image: postgres:18-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=go_api
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d go_api"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    
