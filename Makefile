@@ -1,4 +1,4 @@
-.PHONY: dev start build migrate clean deps fmt stop
+.PHONY: dev start build clean deps fmt stop
 
 APP_NAME=go_api
 BINARY_NAME=go_api
@@ -16,10 +16,6 @@ dev:
 start:build
 	@echo "Starting $(APP_NAME)..."
 	@$(BUILD_DIR)/$(BINARY_NAME)
-
-migrate:
-	@echo "Migrating database..."
-	@go run ./cmd/api -migrate-only
 
 clean:
 	@echo "Cleaning up..."

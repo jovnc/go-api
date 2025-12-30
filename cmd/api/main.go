@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,10 +14,6 @@ import (
 )
 
 func main() {
-	// Parse command-line flags
-	migrateOnly := flag.Bool("migrate-only", false, "Run database migrations and exit")
-	flag.Parse()
-
 	// Load config
 	config, err := serverconfig.LoadConfig()
 	if err != nil {
@@ -31,15 +26,12 @@ func main() {
 	}
 	defer storage.Close()
 
-	// Run migrations (if flag is set)
-	if *migrateOnly {
-		log.Println("Running database migrations...")
-		if err := storage.Migrate(); err != nil {
-			log.Fatalf("Failed to run migrations: %v", err)
-		}
-		log.Println("Migrations completed successfully")
-		return
+	// Run migrations
+	log.Println("Running database migrations...")
+	if err := storage.Migrate(); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
 	}
+	log.Println("Migrations completed successfully")
 
 	// Connect to Redis
 	redisClient := storage.ConnectRedis()
