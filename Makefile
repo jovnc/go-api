@@ -1,4 +1,4 @@
-.PHONY: dev start build clean deps fmt stop
+.PHONY: dev start build clean deps fmt stop test
 
 APP_NAME=go_api
 BINARY_NAME=go_api
@@ -33,3 +33,7 @@ fmt:
 stop:
 	@echo "Stopping $(APP_NAME)..."
 	@pkill -f "go run ./cmd/api" || echo "No $(APP_NAME) process found"
+
+test:
+	@echo "Running tests..."
+	@go test ./tests/... -v
