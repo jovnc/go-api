@@ -52,12 +52,12 @@ make dev
 make start
 ```
 
-### Database Migration
+### Using Docker Compose
 
-Always run migrations after database schema changes.
+Ensure you have Docker and Docker Compose installed, then run:
 
 ```bash
-make migrate
+docker-compose up -d
 ```
 
 ## Available Make Commands
@@ -65,7 +65,6 @@ make migrate
 - `make dev` - Run the application in development mode with hot reload
 - `make build` - Build the application binary
 - `make start` - Build and start the application
-- `make migrate` - Run database migrations
 - `make deps` - Download and tidy dependencies
 - `make fmt` - Format the code
 - `make clean` - Clean build artifacts
@@ -109,10 +108,8 @@ make migrate
 - Add CORS middleware
 - Add HTTPS/TLS support
 - Add request timeout configuration
-- Add healthcheck for database and Redis
 - Add API documentation (Swagger/OpenAPI)
 - Add pagination for list endpoint
 - Add request/response structured logging
-- Add Docker support
 - Add CI/CD pipeline
 - Deployment to cloud provider
